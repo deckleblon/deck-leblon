@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Deck Leblon</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="admin-page">
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo-wrap" style="text-decoration:none;">
+        <svg class="logo-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="58" fill="#111" stroke="url(#goldRing2)" stroke-width="4"/>
+          <defs>
+            <linearGradient id="goldRing2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f5c518"/>
+              <stop offset="50%" stop-color="#c9960c"/>
+              <stop offset="100%" stop-color="#f5c518"/>
+            </linearGradient>
+            <linearGradient id="goldText2" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#f5d060"/>
+              <stop offset="100%" stop-color="#b8860b"/>
+            </linearGradient>
+          </defs>
+          <text x="18" y="62" font-family="Georgia,serif" font-size="38" font-weight="900" fill="url(#goldText2)">D</text>
+          <text x="62" y="55" font-family="Georgia,serif" font-size="30" font-weight="900" fill="url(#goldText2)">L</text>
+          <path d="M18 68 Q38 60 60 68 Q82 76 102 68" stroke="url(#goldRing2)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <text x="60" y="88" font-family="Georgia,serif" font-size="14" font-weight="700" fill="url(#goldText2)" text-anchor="middle" letter-spacing="3">DECK</text>
+          <text x="60" y="102" font-family="Georgia,serif" font-size="8" font-weight="400" fill="url(#goldText2)" text-anchor="middle" letter-spacing="4">LEBLON</text>
+        </svg>
+        <div class="logo-text">
+          <span class="logo-deck">DECK</span>
+          <span class="logo-leblon">— LEBLON —</span>
+        </div>
+      </a>
+
+      <nav class="nav" id="nav">
+        <a href="index.html" class="nav-link">← Ver Cardápio</a>
+        <span class="nav-link" style="color:var(--gold);cursor:default;">Área Admin</span>
+      </nav>
+
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== ADMIN HEADER ===== -->
+  <div class="admin-header">
+    <div class="container">
+      <h1>⚙️ Gerenciar Cardápio</h1>
+      <p>Adicione, edite ou remova itens do cardápio do Deck Leblon.</p>
+    </div>
+  </div>
+
+  <!-- ===== CONFIG BANNER ===== -->
+  <div id="configBanner" style="display:none; background:#1a1a0a; border-top:1px solid #7a5c06; border-bottom:1px solid #7a5c06; padding:14px 0;">
+    <div class="container" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+      <span style="font-size:1.2rem;">⚠️</span>
+      <div style="flex:1; min-width:200px;">
+        <strong style="color:var(--gold-light); font-size:0.9rem;">Supabase não configurado</strong>
+        <p style="color:var(--grey); font-size:0.8rem; margin-top:2px;">Os dados estão sendo salvos localmente no navegador. Configure o Supabase para persistir em nuvem.</p>
+      </div>
+      <a href="#" onclick="document.getElementById('configModal').style.display='flex'; return false;" class="btn-gold-outline" style="font-size:0.75rem; padding:8px 16px;">Como configurar</a>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN CONTENT ===== -->
+  <div class="container">
+    <div class="admin-layout">
+
+      <!-- FORM -->
+      <div class="admin-form-wrap" id="adminFormWrap">
+        <h2 id="formTitle">Novo Item</h2>
+        <form id="adminForm" novalidate>
+
+          <div class="form-group">
+            <label class="form-label" for="itemName">Nome do item *</label>
+            <input class="form-input" type="text" id="itemName" placeholder="Ex: Camarão ao ajillo" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="itemCategory">Categoria *</label>
+            <!-- Select customizado -->
+            <div class="cat-select-wrap" id="catSelectWrap">
+              <button type="button" class="cat-select-btn" id="catSelectBtn">
+                <span id="catSelectLabel">Selecione uma categoria…</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="cat-dropdown" id="catDropdown">
+
+                <div class="cat-group-label">🍢 Petiscos</div>
+                <button type="button" class="cat-option" data-value="Petiscos">Petiscos</button>
+
+                <div class="cat-divider"></div>
+
+                <div class="cat-divider"></div>
+
+                <div class="cat-group-label">🥤 Bebidas</div>
+                <button type="button" class="cat-option" data-value="Bebidas Alcoólicas">🍺 Alcoólicas</button>
+                <button type="button" class="cat-option" data-value="Bebidas Não Alcoólicas">🧃 Não Alcoólicas</button>
+
+              </div>
+            </div>
+            <!-- Hidden input que o form lê -->
+            <input type="hidden" id="itemCategory" name="itemCategory" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="itemPrice">Preço (R$) *</label>
+            <input class="form-input" type="number" id="itemPrice" placeholder="Ex: 49.90"
+              step="0.01" min="0" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="itemDesc">Descrição</label>
+            <textarea class="form-textarea" id="itemDesc"
+              placeholder="Descreva o prato, ingredientes, destaques…"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Imagem do item</label>
+            <div class="img-upload-area" id="uploadArea">
+              <input type="file" id="imgInput" accept="image/*" />
+              <div class="upload-icon">📷</div>
+              <div class="upload-label">
+                <span>Clique para escolher</span> ou arraste a imagem aqui<br/>
+                <small style="color:#666;">JPG, PNG, WEBP — máx 5 MB</small>
+              </div>
+            </div>
+            <div class="img-preview-wrap" id="imgPreviewWrap">
+              <img id="imgPreview" src="" alt="Preview" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-submit" id="submitBtn">+ Adicionar Item</button>
+            <button type="button" class="btn-cancel-form" id="cancelBtn">Cancelar</button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- LIST -->
+      <div class="admin-list-wrap">
+        <h2>
+          Itens do Cardápio
+          <span class="item-count" id="itemCount">0 itens</span>
+        </h2>
+
+        <div class="admin-search">
+          <input class="form-input" type="text" id="adminSearch" placeholder="🔍  Buscar por nome ou categoria…" />
+        </div>
+
+        <div class="admin-items-grid" id="adminItemsGrid">
+          <div class="loading" style="grid-column:1/-1;">
+            <div class="spinner"></div>
+            <p>Carregando…</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== CONFIG MODAL ===== -->
+  <div id="configModal" style="display:none;" class="config-modal-overlay">
+    <div class="config-modal">
+      <h2>🔧 Configurar Supabase</h2>
+      <p>Siga os passos abaixo para conectar o cardápio ao banco de dados em nuvem:</p>
+
+      <div class="config-step">
+        <div class="config-step-num">1</div>
+        <p>Acesse <a href="https://supabase.com" target="_blank" style="color:var(--gold);">supabase.com</a> e crie uma conta gratuita.</p>
+      </div>
+      <div class="config-step">
+        <div class="config-step-num">2</div>
+        <p>Crie um novo projeto e aguarde a inicialização.</p>
+      </div>
+      <div class="config-step">
+        <div class="config-step-num">3</div>
+        <p>Em <strong>Project Settings → API</strong>, copie a <code>Project URL</code> e a chave <code>anon public</code>.</p>
+      </div>
+      <div class="config-step">
+        <div class="config-step-num">4</div>
+        <p>Abra o arquivo <code>supabase-config.js</code> e substitua <code>SUA_SUPABASE_URL_AQUI</code> e <code>SUA_SUPABASE_ANON_KEY_AQUI</code>.</p>
+      </div>
+      <div class="config-step">
+        <div class="config-step-num">5</div>
+        <p>Em <strong>SQL Editor</strong> no Supabase, execute o SQL que está nos comentários do arquivo <code>supabase-config.js</code>.</p>
+      </div>
+
+      <div style="margin-top:28px; display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn-gold" onclick="document.getElementById('configModal').style.display='none'">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LOGIN OVERLAY ===== -->
+  <div id="loginOverlay" style="
+    position:fixed; inset:0; z-index:9999;
+    background:#0a0a0a;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  ">
+    <div style="
+      background:#161616;
+      border:1px solid rgba(201,150,12,0.35);
+      border-radius:16px;
+      padding:40px 36px;
+      width:100%; max-width:380px;
+      box-shadow:0 0 40px rgba(201,150,12,0.12);
+      text-align:center;
+    ">
+      <!-- Logo -->
+      <svg width="64" height="64" viewBox="0 0 120 120" style="margin:0 auto 20px;">
+        <circle cx="60" cy="60" r="58" fill="#111" stroke="#c9960c" stroke-width="4"/>
+        <text x="18" y="62" font-family="Georgia,serif" font-size="38" font-weight="900" fill="#c9960c">D</text>
+        <text x="62" y="55" font-family="Georgia,serif" font-size="30" font-weight="900" fill="#c9960c">L</text>
+        <path d="M18 68 Q38 60 60 68 Q82 76 102 68" stroke="#c9960c" stroke-width="2.5" fill="none"/>
+        <text x="60" y="88" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#c9960c" text-anchor="middle" letter-spacing="3">DECK</text>
+        <text x="60" y="102" font-family="Georgia,serif" font-size="8" fill="#c9960c" text-anchor="middle" letter-spacing="4">LEBLON</text>
+      </svg>
+
+      <h2 style="font-family:'Playfair Display',serif; font-size:1.4rem; color:#f5d060; margin-bottom:4px;">Área Restrita</h2>
+      <p style="color:#666; font-size:0.82rem; margin-bottom:28px;">Acesso exclusivo para administradores</p>
+
+      <form id="loginForm" novalidate>
+        <div style="margin-bottom:14px; text-align:left;">
+          <label style="display:block; font-size:0.72rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#c9960c; margin-bottom:6px;">Usuário</label>
+          <input id="loginUser" type="text" autocomplete="username"
+            style="width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(201,150,12,0.25); border-radius:8px; color:#f0ece0; font-family:'Inter',sans-serif; font-size:0.9rem; padding:11px 14px; outline:none;"
+            placeholder="Digite seu usuário" />
+        </div>
+        <div style="margin-bottom:20px; text-align:left;">
+          <label style="display:block; font-size:0.72rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#c9960c; margin-bottom:6px;">Senha</label>
+          <input id="loginPass" type="password" autocomplete="current-password"
+            style="width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(201,150,12,0.25); border-radius:8px; color:#f0ece0; font-family:'Inter',sans-serif; font-size:0.9rem; padding:11px 14px; outline:none;"
+            placeholder="••••••••" />
+        </div>
+        <div id="loginError" style="display:none; background:#2a1a1a; border:1px solid #6a2d2d; border-radius:6px; color:#da6f6f; font-size:0.8rem; padding:10px 14px; margin-bottom:16px;">
+          Usuário ou senha incorretos.
+        </div>
+        <button type="submit" style="
+          width:100%; padding:13px;
+          background:linear-gradient(135deg,#f5c518,#c9960c);
+          border:none; border-radius:8px;
+          color:#0a0a0a; font-family:'Inter',sans-serif; font-weight:700;
+          font-size:0.85rem; letter-spacing:1px; text-transform:uppercase;
+          cursor:pointer;
+        ">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ── Credenciais (armazenadas como hash SHA-256, não em texto puro) ──
+    // Para gerar um novo hash: https://emn178.github.io/online-tools/sha256.html
+    const ADMIN_USER_HASH = 'bd35565dd0cdc6b553cfc526ba66cc4228ec3a23561179514f4ff35c6a1a8bfa'; // helane
+    const ADMIN_PASS_HASH = '6cda3286b168d396ec539b002b14f58a6aebd453b6e5bc146c2d82dfd2614bc3'; // 0346
+
+    const SESSION_KEY = 'dl_admin_auth';
+
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    const overlay   = document.getElementById('loginOverlay');
+    const loginForm = document.getElementById('loginForm');
+    const loginErr  = document.getElementById('loginError');
+
+    function checkSession() {
+      return sessionStorage.getItem(SESSION_KEY) === 'true';
+    }
+
+    function showAdmin() {
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    if (!checkSession()) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      showAdmin();
+    }
+
+    loginForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const user = document.getElementById('loginUser').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPass').value;
+
+      const [userHash, passHash] = await Promise.all([sha256(user), sha256(pass)]);
+
+      if (userHash === ADMIN_USER_HASH && passHash === ADMIN_PASS_HASH) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        loginErr.style.display = 'none';
+        showAdmin();
+      } else {
+        loginErr.style.display = 'block';
+        document.getElementById('loginPass').value = '';
+        document.getElementById('loginPass').focus();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', function () {
+      if (checkSession()) {
+        const nav = document.getElementById('nav');
+        if (nav) {
+          const btn = document.createElement('button');
+          btn.textContent = 'Sair';
+          btn.className = 'btn-gold-outline';
+          btn.style.cssText = 'font-size:.75rem; padding:7px 16px; cursor:pointer;';
+          btn.onclick = function () {
+            sessionStorage.removeItem(SESSION_KEY);
+            location.reload();
+          };
+          nav.appendChild(btn);
+        }
+      }
+    });
+  </script>
+
+  <script>
+    // ── Dropdown de categoria customizado ───────────────────────
+    (function () {
+      const wrap    = document.getElementById('catSelectWrap');
+      const btn     = document.getElementById('catSelectBtn');
+      const label   = document.getElementById('catSelectLabel');
+      const dropdown= document.getElementById('catDropdown');
+      const hidden  = document.getElementById('itemCategory');
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const isOpen = dropdown.classList.contains('open');
+        close();
+        if (!isOpen) open();
+      });
+
+      dropdown.querySelectorAll('.cat-option').forEach(opt => {
+        opt.addEventListener('click', function () {
+          const val = this.dataset.value;
+          hidden.value = val;
+          label.textContent = this.textContent;
+          btn.classList.add('selected');
+          dropdown.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
+          this.classList.add('selected');
+          close();
+        });
+      });
+
+      document.addEventListener('click', close);
+
+      function open() {
+        btn.classList.add('open');
+        dropdown.classList.add('open');
+      }
+      function close() {
+        btn.classList.remove('open');
+        dropdown.classList.remove('open');
+      }
+
+      // Expõe reset para o app.js poder limpar ao resetar o form
+      window.resetCatSelect = function () {
+        hidden.value = '';
+        label.textContent = 'Selecione uma categoria…';
+        btn.classList.remove('selected');
+        dropdown.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
+      };
+
+      // Expõe set para o app.js preencher ao editar um item
+      window.setCatSelect = function (val) {
+        const opt = dropdown.querySelector(`.cat-option[data-value="${val}"]`);
+        if (opt) {
+          hidden.value = val;
+          label.textContent = opt.textContent;
+          btn.classList.add('selected');
+          dropdown.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+        }
+      };
+    })();
+  </script>
+
+  <script src="supabase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
