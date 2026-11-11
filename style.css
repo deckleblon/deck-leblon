@@ -120,6 +120,13 @@ img { max-width: 100%; display: block; }
 
 .logo-svg { width: 52px; height: 52px; flex-shrink: 0; }
 
+.logo-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .logo-text {
   display: flex;
   flex-direction: column;
