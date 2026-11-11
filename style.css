@@ -452,7 +452,7 @@ img { max-width: 100%; display: block; }
 }
 
 .card-body {
-  padding: 20px;
+  padding: clamp(10px, 3vw, 20px);
 }
 .card-name {
   font-family: 'Playfair Display', serif;
@@ -1082,7 +1082,7 @@ img { max-width: 100%; display: block; }
     z-index: 99;
   }
   .hamburger { display: flex; }
-  .menu-grid { grid-template-columns: 1fr; }
+  .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .admin-items-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .sobre-badges { gap: 20px; }
 }
